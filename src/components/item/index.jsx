@@ -1,14 +1,15 @@
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Color } from "../../constants"
 import { Swipeable } from "react-native-gesture-handler";
-import { DelateSvg, EditSvg } from "../../../assets/svg";
+import { DelateSvg, EditSvg, Reject, Success } from "../../../assets/svg";
 import { Alert } from 'react-native';
 import { db } from "../../database";
 import { useNavigation } from "@react-navigation/native";
 
 const width = Dimensions.get("window").width - 20
 
-export const Item = ({ number, image, date, id, delate }) => {
+export const Item = ({ number, image, date, id, delate, upload, name }) => {
+  console.log(upload)
   const navigation = useNavigation()
   const formattedDate = new Date(date).toLocaleString('en-US', {
     month: 'long',
@@ -46,16 +47,22 @@ export const Item = ({ number, image, date, id, delate }) => {
     <View style={styles.item}>
       <View style={styles.info}>
         <View>
-          <Text>BEND</Text>
+          {/* <Text>BEND</Text> */}
           <Text>{number || "NOT DECODED"}</Text>
         </View>
         <View>
           <Text>Uploaded {formattedDate}</Text>
-          <Text>Images: 1</Text>
+          <Text>{name}</Text>
         </View>
       </View>
-      <View>
+      <View style={[styles.image, { position: 'relative' }]}  >
         <Image source={{ uri: image }} style={styles.image} />
+        <View style={{ position: "absolute", bottom: 0, right: 0 }}>
+          {upload === 0 ?
+            <Reject /> :
+            <Success />
+          }
+        </View>
       </View>
     </View>
   </Swipeable>

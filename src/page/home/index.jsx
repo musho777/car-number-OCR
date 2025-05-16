@@ -2,12 +2,14 @@ import { View, SafeAreaView, TouchableOpacity, StyleSheet, Text, FlatList, Alert
 import { Item } from "../../components/item"
 import { Color } from "../../constants"
 import { useFocusEffect, useNavigation } from "@react-navigation/native"
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { db } from "../../database";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const Home = () => {
   const [dataList, setDataList] = useState([])
   const navigation = useNavigation()
+  const [token, setToken] = useState()
 
   const fetchData = () => {
     db.transaction(tx => {
@@ -29,7 +31,6 @@ export const Home = () => {
     });
   };
   const confirmDelete = (id) => {
-    console.log(id)
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this item?',
@@ -65,11 +66,88 @@ export const Home = () => {
     });
   };
 
+
   useFocusEffect(
     useCallback(() => {
       fetchData();
     }, [])
   );
+
+  const getNotUploadedData = () => {
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM my_table WHERE upload = 0',
+          [],
+          (txObj, result) => {
+            const items = [];
+            for (let i = 0; i < result.rows.length; i++) {
+              items.push(result.rows.item(i));
+            }
+            resolve(items);
+          },
+          (txObj, error) => {
+            reject(error);
+          }
+        );
+      });
+    });
+  };
+
+
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const rows = await getNotUploadedData();
+      if (rows?.length === 0) return;
+
+      const date = new Date();
+      const isoDate = date.toISOString().split('T')[0];
+
+      const images = rows.map((row, index) => ({
+        value: row.text,
+        upload_date: isoDate,
+        image_number: 1,
+        file: row.imageUri
+      }));
+      const response = await fetch('https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/uploadImage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ images })
+      });
+      console.log(response)
+      // const data = await response.json();
+      if (!response.ok) {
+        console.log('Server responded with error, keeping items as not uploaded.');
+        return;
+      }
+
+      db.transaction(tx => {
+        tx.executeSql(
+          'UPDATE my_table SET upload = 1 WHERE upload = 0',
+          [],
+          () => console.log('Successfully updated all rows to upload=1'),
+          (txObj, err) => console.log('Error updating rows:', err)
+        );
+      });
+      fetchData()
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [token]);
+
+  const getToken = async () => {
+    let t = await AsyncStorage.getItem("token")
+    setToken(t)
+  }
+
+  useEffect(() => {
+    getToken()
+  }, [])
+
 
   return <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.wrapper}>
@@ -80,9 +158,11 @@ export const Home = () => {
         renderItem={({ item }) => <Item
           delate={(id) => confirmDelete(id)}
           id={item.id}
+          name={item.name}
           image={item.imageUri}
           number={item.text}
           date={item.createat}
+          upload={item.upload}
         />}
       />
     </View>

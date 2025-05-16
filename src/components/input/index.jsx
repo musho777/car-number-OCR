@@ -5,6 +5,7 @@ export const Input = ({ placeholder, ...rest }) => {
   return <TextInput
     {...rest}
     placeholder={placeholder}
+    placeholderTextColor={"#888"}
     style={[styles.input]} />
 }
 

@@ -64,3 +64,49 @@ export const Settings = () => {
     />
   </Svg>
 }
+
+export const Search = () => {
+  return <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20px"
+    height="20px"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <Path
+      d="M15.796 15.811L21 21m-3-10.5a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"
+      stroke="#000"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+}
+
+export const Success = () => {
+  return <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="#129e00"
+    width="40px"
+    height="40px"
+    viewBox="-1.7 0 20.4 20.4"
+    className="cf-icon-svg"
+    stroke="#129e00"
+  >
+    <Path d="M16.417 10.283A7.917 7.917 0 118.5 2.366a7.916 7.916 0 017.917 7.917zm-4.105-4.498a.791.791 0 00-1.082.29l-3.828 6.63-1.733-2.08a.791.791 0 10-1.216 1.014l2.459 2.952a.792.792 0 00.608.285.83.83 0 00.068-.003.791.791 0 00.618-.393L12.6 6.866a.791.791 0 00-.29-1.081z" />
+  </Svg>
+}
+
+export const Reject = () => {
+  return <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="red"
+    width="40px"
+    height="40px"
+    viewBox="-1.7 0 20.4 20.4"
+    className="cf-icon-svg"
+    stroke="red"
+  >
+    <Path d="M16.417 10.283A7.917 7.917 0 118.5 2.366a7.916 7.916 0 017.917 7.917zm-6.804.01l3.032-3.033a.792.792 0 00-1.12-1.12L8.494 9.173 5.46 6.14a.792.792 0 00-1.12 1.12l3.034 3.033-3.033 3.033a.792.792 0 001.12 1.119l3.032-3.033 3.033 3.033a.792.792 0 001.12-1.12z" />
+  </Svg>
+}

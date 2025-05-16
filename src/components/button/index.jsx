@@ -1,9 +1,12 @@
-import { StyleSheet, Text, TouchableOpacity } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, ActivityIndicator } from "react-native"
 import { Color } from "../../constants"
 
-export const Button = ({ title, onPress }) => {
-  return <TouchableOpacity onPress={onPress} style={styles.button}>
-    <Text style={styles.text}>{title}</Text>
+export const Button = ({ title, onPress, loading, disabled, ...rest }) => {
+  return <TouchableOpacity  {...rest} disabled={disabled} onPress={onPress} style={[styles.button, disabled && { backgroundColor: '#ccc' }]}>
+    {loading ?
+      <ActivityIndicator color={"white"} /> :
+      <Text style={styles.text}>{title}</Text>
+    }
   </TouchableOpacity>
 }
 
@@ -17,7 +20,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   text: {
-    fontSize: 20,
+    fontSize: 16,
     color: 'white'
   }
 })

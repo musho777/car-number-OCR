@@ -1,23 +1,95 @@
-import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Dimensions, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Input } from '../../../components/input';
 import { Button } from '../../../components/button';
 import { Color } from '../../../constants';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-export const Login = () => (
-  <View>
+export const Login = () => {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const navigation = useNavigation()
+  const login = () => {
+    setLoading(true);
+    setError(null);
+    fetch('https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      })
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw data;
+        }
+        if (data.success) {
+          await AsyncStorage.setItem("token", data.token)
+          await AsyncStorage.setItem("user", data.user.email)
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            })
+          )
+        }
+      })
+      .catch((err) => {
+        if (err.data?.email) {
+          setError(err.data?.email);
+        } else {
+          setError("Произошла неизвестная ошибка.");
+        }
+      })
+      .finally((r) => {
+        setLoading(false);
+      });
+  };
+  return <KeyboardAvoidingView
+    style={{ flex: 1 }}
+  // behavior={Platform.OS === "ios" ? "position" : "height"}
+  >
     <Image style={styles.image} source={require("../../../../assets/image/bg.jpeg")} />
     <View style={styles.loginWrapper}>
       <Text style={styles.title}>Login</Text>
+      {error && <Text style={{ color: "red", marginBottom: 10 }}>{error}</Text>}
       <View style={styles.inputWrapper}>
-        <Input placeholder={"login"} width={"100%"} />
-        <Input placeholder={"password"} width={"100%"} />
+        <Input
+          value={email}
+          onChangeText={(e) => setEmail(e)}
+          placeholder={"login"}
+          width={"100%"}
+          autoCorrect={false}  // Disable predictive text
+          autoCapitalize="none"
+        />
+        <Input
+          secureTextEntry
+          value={password}
+          onChangeText={(e) => setPassword(e)}
+          placeholder={"password"}
+          width={"100%"}
+        />
       </View>
-      <Button title={"login"} />
+      <Button
+        disabled={email === "" || password === ""}
+        loading={loading}
+        onPress={() => login()}
+        title={"login"}
+      />
+      <TouchableOpacity style={{ marginTop: 10 }} onPress={() => navigation.navigate("register")}>
+        <Text style={styles.link}>don't have an account?</Text>
+      </TouchableOpacity>
     </View>
-  </View>
-);
+  </KeyboardAvoidingView>
+};
 
 const styles = StyleSheet.create({
   image: {
@@ -28,13 +100,18 @@ const styles = StyleSheet.create({
   loginWrapper: {
     position: 'absolute',
     backgroundColor: Color.loginBg,
-    width: '100%',
-    bottom: 0,
+    width: '90%',
     height: 350,
     padding: 20,
-    borderTopEndRadius: 25,
-    borderTopLeftRadius: 25,
-    alignItems: 'center'
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '50%',
+    left: '50%',
+    transform: [
+      { translateX: -0.45 * Dimensions.get('window').width },
+      { translateY: -200 }
+    ]
   },
   inputWrapper: {
     width: '100%',
@@ -44,5 +121,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "500"
-  }
+  },
+  link: {
+    color: '#007bff',
+    textDecorationLine: 'underline',
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 10,
+    textAlign: 'center',
+  },
 });
