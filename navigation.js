@@ -4,11 +4,10 @@ import { Home } from './src/page/home';
 import { AddPhot } from './src/page/addPhoto';
 import { EditPhoto } from './src/page/edit';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
-import { Search, Settings } from './assets/svg';
+import {  Settings } from './assets/svg';
 import { SettingsPage } from './src/page/settings';
 import { Login } from './src/page/auth/login';
 import { SearchPage } from './src/page/search';
-import { Register } from './src/page/auth/register';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Color } from './src/constants';
@@ -73,12 +72,6 @@ export const Navigation = ()=> {
         />
           
           <Stack.Screen name="login" component={Login} 
-          options={{
-            headerShown: false,
-          }}
-        />
-         
-         <Stack.Screen name="register" component={Register} 
           options={{
             headerShown: false,
           }}

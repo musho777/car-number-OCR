@@ -95,49 +95,110 @@ export const Home = () => {
   };
 
 
-
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const rows = await getNotUploadedData();
-      if (rows?.length === 0) return;
+    let isCancelled = false;
 
-      const date = new Date();
-      const isoDate = date.toISOString().split('T')[0];
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-      const images = rows.map((row, index) => ({
-        value: row.text,
-        upload_date: isoDate,
-        image_number: 1,
-        file: row.imageUri
-      }));
-      const response = await fetch('https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/uploadImage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ images })
-      });
-      console.log(response)
-      // const data = await response.json();
-      if (!response.ok) {
-        console.log('Server responded with error, keeping items as not uploaded.');
-        return;
+    const startUploading = async () => {
+      while (!isCancelled) {
+        const rows = await getNotUploadedData();
+        if (!rows || rows.length === 0) {
+          await sleep(1000);
+          continue;
+        }
+
+        const date = new Date().toISOString().split('T')[0];
+
+        for (const row of rows) {
+          if (isCancelled) break;
+
+          const imageData = {
+            value: row.text,
+            upload_date: date,
+            images: JSON.parse(row.imageUri)
+          };
+
+          try {
+            const response = await fetch('https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/uploadImageCar', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(imageData)
+            });
+
+            if (response.ok) {
+              db.transaction(tx => {
+                tx.executeSql(
+                  'UPDATE my_table SET upload = 1 WHERE id = ?',
+                  [row.id], // update only the specific row
+                  () => console.log(`Uploaded and updated row with ID ${row.id}`),
+                  (txObj, err) => console.log('Error updating row:', err)
+                );
+              });
+              fetchData();
+            } else {
+              console.log('Upload failed for row, will retry later.');
+            }
+          } catch (err) {
+            console.error('Network error:', err);
+          }
+
+          await sleep(2500);
+        }
       }
+    };
 
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE my_table SET upload = 1 WHERE upload = 0',
-          [],
-          () => console.log('Successfully updated all rows to upload=1'),
-          (txObj, err) => console.log('Error updating rows:', err)
-        );
-      });
-      fetchData()
-    }, 5000);
+    startUploading();
 
-    return () => clearInterval(interval);
+    return () => {
+      isCancelled = true;
+    };
   }, [token]);
+
+
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     const rows = await getNotUploadedData();
+  //     if (rows?.length === 0) return;
+
+  //     const date = new Date();
+  //     const isoDate = date.toISOString().split('T')[0];
+
+  //     const images = rows.map((row, index) => ({
+  //       value: row.text,
+  //       upload_date: isoDate,
+  //       images: JSON.parse(row.imageUri)
+  //     }));
+
+  //     const response = await fetch('https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/uploadImageCar', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${token}`
+  //       },
+  //       body: JSON.stringify(images[0])
+  //     });
+  //     if (!response.ok) {
+  //       console.log('Server responded with error, keeping items as not uploaded.');
+  //       return;
+  //     }
+
+  //     db.transaction(tx => {
+  //       tx.executeSql(
+  //         'UPDATE my_table SET upload = 1 WHERE upload = 0',
+  //         [],
+  //         () => console.log('Successfully updated all rows to upload=1'),
+  //         (txObj, err) => console.log('Error updating rows:', err)
+  //       );
+  //     });
+  //     fetchData()
+  //   }, 5000);
+
+  //   return () => clearInterval(interval);
+  // }, [token]);
 
   const getToken = async () => {
     let t = await AsyncStorage.getItem("token")
@@ -146,7 +207,26 @@ export const Home = () => {
 
   useEffect(() => {
     getToken()
-  }, [])
+    db.transaction(tx => {
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS my_table (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          text TEXT,
+          imageUri TEXT,
+          createat TEXT,
+          upload INTEGER DEFAULT 0
+        )`,
+        [],
+        () => {
+          console.log('Table created successfully');
+        },
+        (error) => {
+          console.log('Error creating table: ', error);
+        }
+      );
+    });
+  }, []);
 
 
   return <SafeAreaView style={{ flex: 1 }}>

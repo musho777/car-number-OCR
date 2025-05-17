@@ -1,21 +1,20 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Input } from "../../components/input"
 import { Button } from "../../components/button"
 import { Color } from "../../constants"
 import { launchCamera } from "react-native-image-picker"
 import TextRecognition from "@react-native-ml-kit/text-recognition"
 import { useEffect, useState } from "react"
-import SQLite from 'react-native-sqlite-storage';
 import { db } from "../../database"
 import { useNavigation } from "@react-navigation/native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import RNFS from 'react-native-fs';
+import { ScrollView } from "react-native-gesture-handler"
 
 const getImageBase64 = async (filePath) => {
   try {
     const cleanPath = filePath.replace('file://', '');
     const base64 = await RNFS.readFile(cleanPath, 'base64');
-    console.log(base64, 'base64')
     return `data:image/jpeg;base64,${base64}`;
   } catch (error) {
     console.error('Failed to convert image to base64:', error);
@@ -25,15 +24,15 @@ const getImageBase64 = async (filePath) => {
 
 export const AddPhot = () => {
   const [value, setValue] = useState("")
-  const [url, setUrl] = useState("")
+  const [url, setUrl] = useState([])
   const [name, setName] = useState("")
-
+  const [hasPermission, setHasPermission] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false)
   const navigation = useNavigation()
   const [token, setToken] = useState("")
 
   const dropAllTables = () => {
-    console.log("fdj")
     db.transaction(tx => {
       tx.executeSql(
         `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`,
@@ -54,6 +53,7 @@ export const AddPhot = () => {
   };
 
 
+
   const saveData = (name, text, imageUri, upload) => {
     const date = new Date().toISOString();
     db.transaction(tx => {
@@ -71,9 +71,7 @@ export const AddPhot = () => {
   };
 
 
-
-  const processImage = async (uri) => {
-    setUrl(uri)
+  const GetText = async (uri) => {
     try {
       const result = await TextRecognition.recognize(uri);
       const text = result.blocks?.map(block => block.text).join(' ');
@@ -81,6 +79,10 @@ export const AddPhot = () => {
     } catch (e) {
       console.error('OCR error:', e);
     }
+  }
+
+  const processImage = async (uri) => {
+    setUrl([...url, { file: await getImageBase64(uri) }])
   };
   const openCamera = () => {
     launchCamera({ mediaType: 'photo', includeBase64: true }, (response) => {
@@ -92,6 +94,14 @@ export const AddPhot = () => {
     });
   };
 
+  const openCamera1 = () => {
+    launchCamera({ mediaType: 'photo', includeBase64: true }, (response) => {
+      if (response.assets && response.assets.length > 0) {
+        const image = response.assets[0];
+        GetText(image.uri)
+      }
+    });
+  };
 
 
   const getToken = async () => {
@@ -99,90 +109,108 @@ export const AddPhot = () => {
     setToken(t)
   }
 
-  useEffect(() => {
-    getToken()
-  }, [])
 
   const handleSaveData = async () => {
     const date = new Date();
     const isoDate = date.toISOString().split('T')[0];
-    let imageur = await getImageBase64(url)
-    console.log(url)
-    const image = [
-      {
-        value,
-        upload_date: isoDate,
-        image_number: name,
-        file: imageur
-      }
-    ]
-    setLoading(true)
+    const image = {
+      value,
+      upload_date: isoDate,
+      images: url
+    }
 
+    setLoading(true)
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", `Bearer ${token}`);
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
-      body: JSON.stringify({ images: image }),
+      body: JSON.stringify(image),
       redirect: "follow"
     };
-
-    fetch("https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/uploadImage", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        saveData(name, value, imageur, 1)
+    fetch("https://xn----nbck7b7ald8atlv.xn--y9a3aq/iosapp.loc/public/api/uploadImageCar", requestOptions)
+      .then((response) => {
+        response.json()
       })
-      .catch((error) => saveData(name, value, imageur, 0))
+      .then((result) => {
+        saveData(name, value, JSON.stringify(url), 1)
+      })
+      .catch((error) => saveData(name, value, JSON.stringify(url), 0))
       .finally(() => setLoading(false))
   }
 
+
+  const removeImage = (indexToRemove) => {
+    setUrl((prev) => prev.filter((_, index) => index !== indexToRemove));
+  }
+
+
+  const onTextDetected = (textBlocks) => {
+    if (textBlocks.length > 0 && !detectedText) {
+      const fullText = textBlocks.map(t => t.text).join(' ');
+      setValue(fullText);
+    }
+  };
+
+  // const frameProcessor = useFrameProcessor((frame) => {
+  //   'worklet';
+  //   const result = scanText(frame);
+  //   runOnJS(onTextDetected)(result.blocks);
+  // }, []);
+
+
+
   useEffect(() => {
-    db.transaction(tx => {
-      tx.executeSql(
-        `CREATE TABLE IF NOT EXISTS my_table (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          text TEXT,
-          imageUri TEXT,
-          createat TEXT,
-          upload INTEGER DEFAULT 0
-        )`,
-        [],
-        () => {
-          console.log('Table created successfully');
-        },
-        (error) => {
-          console.log('Error creating table: ', error);
-        }
-      );
-    });
-  }, []);
+    getToken()
+  }, [])
 
-  // useEffect(() => {
-  //   dropAllTables()
-  // }, [])
 
-  return <View style={styles.wrapper}>
-    <View style={styles.header}>
-      <TouchableOpacity disabled={loading || !url} style={styles.save} onPress={() => handleSaveData()}>
-        {loading ?
-          <ActivityIndicator size="small" color={Color.button} /> :
-          <Text style={[styles.text, url === "" && { color: Color.itemBorder }]}>Save</Text>
-        }
-      </TouchableOpacity>
+  // if (scanning)
+  //   return <Camera
+  //     ref={camera}
+  //     style={StyleSheet.absoluteFill}
+  //     device={device}
+  //     isActive={true}
+  //     frameProcessor={frameProcessor}
+  //     frameProcessorFps={5}
+  //   />
+
+  return <ScrollView >
+    <View style={styles.wrapper}>
+      <View style={styles.header}>
+        <TouchableOpacity disabled={loading || !url} style={styles.save} onPress={() => handleSaveData()}>
+          {loading ?
+            <ActivityIndicator size="small" color={Color.button} /> :
+            <Text style={[styles.text, url === "" && { color: Color.itemBorder }]}>Save</Text>
+          }
+        </TouchableOpacity>
+      </View>
+      <View style={styles.inputWrapper}>
+        <Input
+          value={value}
+          onChangeText={(e) => setValue(e)}
+          width={"100%"}
+          placeholderTextColor={Color.placeholderTextColor}
+          placeholder={"Car number"}
+        />
+        <Button onPress={() => openCamera1()} title="scan" />
+        <Button onPress={() => openCamera()} title="photo" />
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: "space-between", width: '100%', gap: 10, flexWrap: "wrap" }}>
+        {url.map((elm, i) => {
+          return <View key={i} style={{ position: 'relative' }}>
+            <TouchableOpacity onPress={() => removeImage(i)} style={{ position: 'absolute', zIndex: 1, right: 10, top: 0 }}>
+              <Text style={{ fontWeight: "900", fontSize: 25, color: 'red' }}>x</Text>
+            </TouchableOpacity>
+            <Image key={i} source={{ uri: elm.file }} style={{ width: 150, height: 150, borderRadius: 20 }} />
+          </View>
+        })}
+      </View>
     </View>
-    <View style={styles.inputWrapper}>
-      <Input
-        value={value}
-        onChangeText={(e) => setValue(e)}
-        width={"100%"}
-        placeholderTextColor={Color.placeholderTextColor}
-        placeholder={"Car number"}
-      />
-      <Button onPress={() => openCamera()} title="scan" />
-    </View>
-  </View>
+
+
+  </ScrollView >
 }
 
 const styles = StyleSheet.create({

@@ -9,7 +9,6 @@ import { useNavigation } from "@react-navigation/native";
 const width = Dimensions.get("window").width - 20
 
 export const Item = ({ number, image, date, id, delate, upload, name }) => {
-  console.log(upload)
   const navigation = useNavigation()
   const formattedDate = new Date(date).toLocaleString('en-US', {
     month: 'long',
@@ -47,16 +46,15 @@ export const Item = ({ number, image, date, id, delate, upload, name }) => {
     <View style={styles.item}>
       <View style={styles.info}>
         <View>
-          {/* <Text>BEND</Text> */}
           <Text>{number || "NOT DECODED"}</Text>
         </View>
         <View>
           <Text>Uploaded {formattedDate}</Text>
-          <Text>{name}</Text>
+          <Text>Image: {JSON.parse(image).length}</Text>
         </View>
       </View>
       <View style={[styles.image, { position: 'relative' }]}  >
-        <Image source={{ uri: image }} style={styles.image} />
+        <Image source={{ uri: JSON.parse(image)[0].file }} style={styles.image} />
         <View style={{ position: "absolute", bottom: 0, right: 0 }}>
           {upload === 0 ?
             <Reject /> :
@@ -85,7 +83,7 @@ const styles = StyleSheet.create({
     width: width / 2
   },
   image: {
-    width: width / 2 - 30,
+    width: width / 2 - 50,
     height: 100,
     borderRadius: 20,
   },

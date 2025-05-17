@@ -55,7 +55,6 @@ export const Login = () => {
   };
   return <KeyboardAvoidingView
     style={{ flex: 1 }}
-  // behavior={Platform.OS === "ios" ? "position" : "height"}
   >
     <Image style={styles.image} source={require("../../../../assets/image/bg.jpeg")} />
     <View style={styles.loginWrapper}>
@@ -67,7 +66,7 @@ export const Login = () => {
           onChangeText={(e) => setEmail(e)}
           placeholder={"login"}
           width={"100%"}
-          autoCorrect={false}  // Disable predictive text
+          autoCorrect={false}
           autoCapitalize="none"
         />
         <Input
@@ -84,9 +83,6 @@ export const Login = () => {
         onPress={() => login()}
         title={"login"}
       />
-      <TouchableOpacity style={{ marginTop: 10 }} onPress={() => navigation.navigate("register")}>
-        <Text style={styles.link}>don't have an account?</Text>
-      </TouchableOpacity>
     </View>
   </KeyboardAvoidingView>
 };
