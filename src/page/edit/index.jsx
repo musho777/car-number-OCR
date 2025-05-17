@@ -44,7 +44,7 @@ export const EditPhoto = () => {
       <TouchableOpacity disabled={loading} style={styles.save} onPress={() => editItem(value)}>
         {loading ?
           <ActivityIndicator size="small" color={Color.button} /> :
-          <Text style={styles.text}>Save</Text>
+          <Text style={styles.text}>Сохранять</Text>
         }
       </TouchableOpacity>
     </View>

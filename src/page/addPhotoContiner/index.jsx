@@ -34,7 +34,6 @@ export const AddPhotContiner = () => {
 
 
   const saveData = (name, text, text1, imageUri, upload) => {
-    console.log(text, text1)
     const date = new Date().toISOString();
     db.transaction(tx => {
       tx.executeSql(
@@ -154,10 +153,10 @@ export const AddPhotContiner = () => {
   return <ScrollView >
     <View style={styles.wrapper}>
       <View style={styles.header}>
-        <TouchableOpacity disabled={loading || !url} style={styles.save} onPress={() => handleSaveData()}>
+        <TouchableOpacity disabled={loading || url.length === 0} style={styles.save} onPress={() => handleSaveData()}>
           {loading ?
             <ActivityIndicator size="small" color={Color.button} /> :
-            <Text style={[styles.text, url === "" && { color: Color.itemBorder }]}>Save</Text>
+            <Text style={[styles.text, url === "" && { color: Color.itemBorder }]}>Сохранять</Text>
           }
         </TouchableOpacity>
       </View>
@@ -167,18 +166,18 @@ export const AddPhotContiner = () => {
           onChangeText={(e) => setValue(e)}
           width={"100%"}
           placeholderTextColor={Color.placeholderTextColor}
-          placeholder={"Car number"}
+          placeholder={"Номер контейнера 1"}
         />
         <Input
           value={value1}
           onChangeText={(e) => setValue1(e)}
           width={"100%"}
           placeholderTextColor={Color.placeholderTextColor}
-          placeholder={"Car number"}
+          placeholder={"Номер контейнера 2"}
         />
         <Button onPress={() => openCamera1()} title="scan 1" />
         <Button onPress={() => openCamera2()} title="scan 2" />
-        <Button onPress={() => openCamera()} title="photo" />
+        <Button onPress={() => openCamera()} title="Фото" />
       </View>
       <View style={{ flexDirection: 'row', justifyContent: "space-between", width: '100%', gap: 10, flexWrap: "wrap" }}>
         {url.map((elm, i) => {
@@ -204,7 +203,9 @@ const styles = StyleSheet.create({
   },
   text: {
     color: Color.blue,
-    fontWeight: '700'
+    fontWeight: '700',
+    width: 200,
+    textAlign: "right"
   },
   header: {
     alignItems: 'flex-end',

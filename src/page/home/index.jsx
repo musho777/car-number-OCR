@@ -247,9 +247,7 @@ export const Home = () => {
       />
     </View>
     <TouchableOpacity onPress={() =>
-      // navigation.navigate('addPhot')
-      navigation.navigate('addPhotContiner')
-
+      navigation.navigate('addPhot')
     } style={styles.add}>
       <Text style={styles.addText}>+</Text>
     </TouchableOpacity>

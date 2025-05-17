@@ -41,7 +41,7 @@ export const Item = ({ number, image, date, id, delate, upload, number1 }) => {
 
   return <Swipeable
     renderRightActions={() => RightActions(id)}
-    renderLeftActions={() => LeftAction(id, number)}
+  // renderLeftActions={() => LeftAction(id, number)}
   >
     <View style={styles.item}>
       <View style={styles.info}>
@@ -55,7 +55,7 @@ export const Item = ({ number, image, date, id, delate, upload, number1 }) => {
         </View>
       </View>
       <View style={[styles.image, { position: 'relative' }]}  >
-        <Image source={{ uri: JSON.parse(image)[0].file }} style={styles.image} />
+        <Image source={{ uri: JSON.parse(image)[0]?.file }} style={styles.image} />
         <View style={{ position: "absolute", bottom: 0, right: 0 }}>
           {upload === 0 ?
             <Reject /> :

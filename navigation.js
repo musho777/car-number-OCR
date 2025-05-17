@@ -24,12 +24,14 @@ export const Navigation = ()=> {
   const getUser = async()=>{
     setLoading(true)
     let token = await AsyncStorage.getItem("token")
+    let role = await AsyncStorage.getItem("role")
+    console.log(role)
     if(token){
-      if(true){
-        setInitialRouteName("HomeContiner")
+      if(role === "Машины"){
+        setInitialRouteName("Home")
       }
       else{
-        setInitialRouteName("Home")
+        setInitialRouteName("HomeContiner")
       }
     }
     setLoading(false)

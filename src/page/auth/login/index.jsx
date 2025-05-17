@@ -31,18 +31,31 @@ export const Login = () => {
         if (!response.ok) {
           throw data;
         }
+        console.log(data.user.roll)
         if (data.success) {
           await AsyncStorage.setItem("token", data.token)
           await AsyncStorage.setItem("user", data.user.email)
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'Home' }],
-            })
-          )
+          await AsyncStorage.setItem("role", data.user.roll)
+          if (data.user.roll === "Машины") {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+              })
+            )
+          }
+          else {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'HomeContiner' }],
+              })
+            )
+          }
         }
       })
       .catch((err) => {
+        console.log(err)
         if (err.data?.email) {
           setError(err.data?.email);
         } else {

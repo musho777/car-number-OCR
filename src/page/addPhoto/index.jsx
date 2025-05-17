@@ -179,7 +179,7 @@ export const AddPhot = () => {
   return <ScrollView >
     <View style={styles.wrapper}>
       <View style={styles.header}>
-        <TouchableOpacity disabled={loading || !url} style={styles.save} onPress={() => handleSaveData()}>
+        <TouchableOpacity disabled={loading || url.length === 0} style={styles.save} onPress={() => handleSaveData()}>
           {loading ?
             <ActivityIndicator size="small" color={Color.button} /> :
             <Text style={[styles.text, url === "" && { color: Color.itemBorder }]}>Save</Text>
@@ -192,10 +192,10 @@ export const AddPhot = () => {
           onChangeText={(e) => setValue(e)}
           width={"100%"}
           placeholderTextColor={Color.placeholderTextColor}
-          placeholder={"Car number"}
+          placeholder={"Номер автомобиля"}
         />
         <Button onPress={() => openCamera1()} title="scan" />
-        <Button onPress={() => openCamera()} title="photo" />
+        <Button onPress={() => openCamera()} title="Фото" />
       </View>
       <View style={{ flexDirection: 'row', justifyContent: "space-between", width: '100%', gap: 10, flexWrap: "wrap" }}>
         {url.map((elm, i) => {
@@ -203,13 +203,11 @@ export const AddPhot = () => {
             <TouchableOpacity onPress={() => removeImage(i)} style={{ position: 'absolute', zIndex: 1, right: 10, top: 0 }}>
               <Text style={{ fontWeight: "900", fontSize: 25, color: 'red' }}>x</Text>
             </TouchableOpacity>
-            <Image key={i} source={{ uri: elm.file }} style={{ width: 150, height: 150, borderRadius: 20 }} />
+            <Image key={i} source={{ uri: elm?.file }} style={{ width: 150, height: 150, borderRadius: 20 }} />
           </View>
         })}
       </View>
     </View>
-
-
   </ScrollView >
 }
 
@@ -229,7 +227,7 @@ const styles = StyleSheet.create({
   },
   save: {
     height: 40,
-    width: 40,
+    width: 200,
     justifyContent: 'flex-end',
     alignItems: 'flex-end'
   },

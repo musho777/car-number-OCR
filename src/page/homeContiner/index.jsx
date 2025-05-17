@@ -217,7 +217,6 @@ export const HomeContiner = () => {
         data={dataList}
         keyExtractor={item => item.id}
         renderItem={({ item }) => {
-          console.log(item)
           return <Item
             delate={(id) => confirmDelete(id)}
             id={item.id}
