@@ -11,6 +11,8 @@ import { SearchPage } from './src/page/search';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Color } from './src/constants';
+import { AddPhotContiner } from './src/page/addPhotoContiner';
+import { HomeContiner } from './src/page/homeContiner';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,7 +25,12 @@ export const Navigation = ()=> {
     setLoading(true)
     let token = await AsyncStorage.getItem("token")
     if(token){
-      setInitialRouteName("Home")
+      if(true){
+        setInitialRouteName("HomeContiner")
+      }
+      else{
+        setInitialRouteName("Home")
+      }
     }
     setLoading(false)
   } 
@@ -63,8 +70,37 @@ export const Navigation = ()=> {
             // ),
           })}
           />
+
+<Stack.Screen 
+          name="HomeContiner" 
+          component={HomeContiner} 
+          options={({ navigation }) => ({
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('settings')}
+                style={{ marginRight: 15 }}
+              >
+                <Settings />
+              </TouchableOpacity>
+            ),
+            // headerLeft: () => (
+            //   <TouchableOpacity
+            //     onPress={() => navigation.goBack("search")}
+            //     style={{ marginLeft: 15 }}
+            //   >
+            //     <Search /> 
+            //   </TouchableOpacity>
+            // ),
+          })}
+          />
         
         <Stack.Screen name="addPhot" component={AddPhot} 
+          options={{
+            headerShown: false,
+            presentation:"modal"
+          }}
+        />
+         <Stack.Screen name="addPhotContiner" component={AddPhotContiner} 
           options={{
             headerShown: false,
             presentation:"modal"

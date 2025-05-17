@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const width = Dimensions.get("window").width - 20
 
-export const Item = ({ number, image, date, id, delate, upload, name }) => {
+export const Item = ({ number, image, date, id, delate, upload, number1 }) => {
   const navigation = useNavigation()
   const formattedDate = new Date(date).toLocaleString('en-US', {
     month: 'long',
@@ -47,6 +47,7 @@ export const Item = ({ number, image, date, id, delate, upload, name }) => {
       <View style={styles.info}>
         <View>
           <Text>{number || "NOT DECODED"}</Text>
+          {number1 && <Text>{number1 || "NOT DECODED"}</Text>}
         </View>
         <View>
           <Text>Uploaded {formattedDate}</Text>
