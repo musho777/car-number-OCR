@@ -190,11 +190,14 @@ export const AddPhot = () => {
         <Input
           value={value}
           onChangeText={(e) => setValue(e)}
+          label={"Vin /Stoch Number"}
           width={"100%"}
+          onPress={() => openCamera1()}
+          scan={true}
           placeholderTextColor={Color.placeholderTextColor}
-          placeholder={"Номер автомобиля"}
+        // placeholder={"Номер автомобиля"}
         />
-        <Button onPress={() => openCamera1()} title="scan" />
+        {/* <Button onPress={() => openCamera1()} title="scan" /> */}
         <Button onPress={() => openCamera()} title="Фото" />
       </View>
       <View style={{ flexDirection: 'row', justifyContent: "space-between", width: '100%', gap: 10, flexWrap: "wrap" }}>

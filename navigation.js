@@ -54,7 +54,9 @@ export const Navigation = ()=> {
           name="Home" 
           component={Home} 
           options={({ navigation }) => ({
-            headerRight: () => (
+             headerTitle: 'History',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
               <TouchableOpacity
                 onPress={() => navigation.navigate('settings')}
                 style={{ marginRight: 15 }}
@@ -62,14 +64,6 @@ export const Navigation = ()=> {
                 <Settings />
               </TouchableOpacity>
             ),
-            // headerLeft: () => (
-            //   <TouchableOpacity
-            //     onPress={() => navigation.goBack("search")}
-            //     style={{ marginLeft: 15 }}
-            //   >
-            //     <Search /> 
-            //   </TouchableOpacity>
-            // ),
           })}
           />
 

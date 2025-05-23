@@ -166,14 +166,20 @@ export const AddPhotContiner = () => {
           onChangeText={(e) => setValue(e)}
           width={"100%"}
           placeholderTextColor={Color.placeholderTextColor}
-          placeholder={"Номер контейнера 1"}
+          // placeholder={"CONTINER NUMBER"}
+          scan
+          label={"CONTINER NUMBER"}
+          onPress={() => openCamera1()}
         />
         <Input
           value={value1}
           onChangeText={(e) => setValue1(e)}
           width={"100%"}
           placeholderTextColor={Color.placeholderTextColor}
-          placeholder={"Номер контейнера 2"}
+          label={"SEAL NUMBER"}
+          scan={true}
+          // placeholder={"SEAL NUMBER"}
+          onPress={() => openCamera2()}
         />
         <Button onPress={() => openCamera1()} title="scan 1" />
         <Button onPress={() => openCamera2()} title="scan 2" />

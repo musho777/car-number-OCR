@@ -46,20 +46,24 @@ export const Item = ({ number, image, date, id, delate, upload, number1 }) => {
     <View style={styles.item}>
       <View style={styles.info}>
         <View>
-          <Text>{number || "NOT DECODED"}</Text>
-          {number1 && <Text>{number1 || "NOT DECODED"}</Text>}
+          <Text style={{ fontWeight: "700", fontSize: 16 }} >{number || "NOT DECODED"}</Text>
+          {number1 && <Text style={{ fontWeight: "700", fontSize: 16 }}>{number1 || "NOT DECODED"}</Text>}
         </View>
         <View>
           <Text>Uploaded {formattedDate}</Text>
-          <Text>Image: {JSON.parse(image).length}</Text>
+          <Text style={{ fontSize: 18, marginTop: 15 }}>Image: {JSON.parse(image).length}</Text>
         </View>
       </View>
       <View style={[styles.image, { position: 'relative' }]}  >
         <Image source={{ uri: JSON.parse(image)[0]?.file }} style={styles.image} />
-        <View style={{ position: "absolute", bottom: 0, right: 0 }}>
+        <View style={{ position: "absolute", bottom: -10, right: -10 }}>
           {upload === 0 ?
-            <Reject /> :
-            <Success />
+            <View style={styles.status}>
+              <Reject />
+            </View> :
+            <View style={styles.status}>
+              <Success />
+            </View>
           }
         </View>
       </View>
@@ -84,13 +88,28 @@ const styles = StyleSheet.create({
     width: width / 2
   },
   image: {
-    width: width / 2 - 50,
+    width: width / 2 - 30,
     height: 100,
-    borderRadius: 20,
+    borderRadius: 5,
   },
   action: {
     justifyContent: 'center',
     width: 80,
     alignItems: 'center'
+  },
+  status: {
+    shadowColor: "#000000",
+    padding: 10,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.17,
+    shadowRadius: 3.05,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "white",
+    backgroundColor: "white",
+    borderRadius: 99999
   }
 })
